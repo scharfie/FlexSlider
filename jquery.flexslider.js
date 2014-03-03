@@ -636,7 +636,11 @@
     };
 
     // public methods
-    slider.flexAnimate = function(target, pause, override, withSync, fromNav) {
+    slider.flexAnimate = function(target, pause, override, withSync, fromNav, animationSpeed) {
+      if (animationSpeed == undefined) {
+        animationSpeed = slider.vars.animationSpeed;
+      }
+
       if (!slider.vars.animationLoop && target !== slider.currentSlide) {
         slider.direction = (target > slider.currentSlide) ? "next" : "prev";
       }
@@ -713,20 +717,26 @@
           } else {
             slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
           }
-          slider.setProps(slideString, "", slider.vars.animationSpeed);
-          if (slider.transitions) {
-            if (!slider.vars.animationLoop || !slider.atEnd) {
-              slider.animating = false;
-              slider.currentSlide = slider.animatingTo;
+
+          slider.setProps(slideString, "", animationSpeed);
+
+          if (animationSpeed > 0) {
+            if (slider.transitions) {
+              if (!slider.vars.animationLoop || !slider.atEnd) {
+                slider.animating = false;
+                slider.currentSlide = slider.animatingTo;
+              }
+              slider.container.unbind("webkitTransitionEnd transitionend");
+              slider.container.bind("webkitTransitionEnd transitionend", function() {
+                slider.wrapup(dimension);
+              });
+            } else {
+              slider.container.animate(slider.args, speed, slider.vars.easing, function(){
+                slider.wrapup(dimension);
+              });
             }
-            slider.container.unbind("webkitTransitionEnd transitionend");
-            slider.container.bind("webkitTransitionEnd transitionend", function() {
-              slider.wrapup(dimension);
-            });
           } else {
-            slider.container.animate(slider.args, slider.vars.animationSpeed, slider.vars.easing, function(){
-              slider.wrapup(dimension);
-            });
+            slider.wrapup(dimension);
           }
         } else { // FADE:
           if (!touch) {
@@ -1108,7 +1118,7 @@
   };
 
   //FlexSlider: Plugin Function
-  $.fn.flexslider = function(options) {
+  $.fn.flexslider = function(options, args) {
     if (options === undefined) options = {};
 
     if (typeof options === "object") {
@@ -1132,6 +1142,7 @@
         case "pause": $slider.pause(); break;
         case "stop": $slider.stop(); break;
         case "next": $slider.flexAnimate($slider.getTarget("next"), true); break;
+        case "jumpTo": $slider.flexAnimate(args, true, null, null, null, 0); break;
         case "prev":
         case "previous": $slider.flexAnimate($slider.getTarget("prev"), true); break;
         default: if (typeof options === "number") $slider.flexAnimate(options, true);

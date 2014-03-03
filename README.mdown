@@ -36,6 +36,7 @@ Helper strings have been added for performing actions quickly on FlexSlider elem
 - `$('#slider').flexslider("next")  //Go to next slide`
 - `$('#slider').flexslider("prev")  //Go to previous slide`
 - `$('#slider').flexslider(3)       //Go fourth slide`
+- `$('#slider').flexslider("jumpTo", 3)  //Go to the fourth slide without animation`
 
 Two new methods are available for adding/removing slides, `slider.addSlide()` and `slider.removeSlide()`. More details about this coming soon.
 
